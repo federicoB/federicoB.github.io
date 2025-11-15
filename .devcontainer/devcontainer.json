@@ -1,0 +1,18 @@
+{
+	"name": "federicoB.github.io devcontainer",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": "."
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+                "yzhang.markdown-all-in-one",
+                "shd101wyy.markdown-preview-enhanced",
+                "eliostruyf.vscode-front-matter",
+                "tamasfe.even-better-toml",
+                "uncenter.better-tera"
+                ]
+		}
+	},
+}
