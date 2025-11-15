@@ -137,9 +137,9 @@
 <p><strong>Identifying the heater and cables</strong></p>
 <p>First, I had to determine the type of machine I was dealing with. That was simple; it was clearly marked on the front.</p>
 <p>I am in possession of a Weishaupt WTC-15A. It is a wall-hung gas condensing boiler from 2014, good, solid German quality, it can last for more than 20 years. But it came from a time of not so much interconnectivity, and it was now my duty to connect it to the world of home automation.</p>
-<p><img src="https://federicoB.github.io/posts/20251115-heating-automation/heater.jpg" alt="My Weishaupt WTC-15A gas condensing boiler" title="My Weishaupt WTC-15A gas condensing boiler" /></p>
+<img src="heater.jpg" alt="My Weishaupt WTC-15A gas condensing boiler" width="200">
 <p>Next, I identified the current thermostat. After removing it from the wall, I read "WCM-FB," which stands for "Weishaupt Condens Manager Fernbedienung" (Remote Control). Pictures on the internet confirmed this.</p>
-<p><img src="/202511_heating_automation/img/thermostat.jpg" alt="My old thermostat a WCM-FB" title="WCM-FB Thermostat" /></p>
+<img src="thermostat.jpg" alt="WCM-FB Thermostat" width="200">
 <p>At first, I was confused by the wiring. The thermostat was connected to the boiler with a blue and a brown cable, and when checking the boiler’s electrical diagram, I assumed the brown wire was a simple relay or M-Bus/Modbus line — basically, a signal cable that just turns the heating on or off. That turned out to be wrong. After researching the blue wire more carefully, I discovered that the two wires together actually form an <strong>eBus</strong> connection: a communication protocol commonly used by German heating system manufacturers. Unlike a basic relay that only sends on/off signals, eBus allows devices to exchange much richer data, such as temperatures, burner status, error codes, and configuration settings. In other words, it’s a small digital network that lets thermostats, controllers, and boilers “talk” intelligently over just a single <strong>pair</strong> of wires.</p>
 <p><strong>Deciding to build rather than buy</strong></p>
 <p>I began the process of researching smart thermostats that would support eBus. My objective was to identify a product within the 50-100€ range that would meet all my criteria. However, I learned that the cost would be considerably higher than I anticipated. For instance, the tado° Smart Thermostat Starter Kit V3+ is compatible with Ebus, but it has a retail price of €223.99.</p>
@@ -164,10 +164,12 @@
 <p>Before I could control the heater from Home Assistant, I wanted to check if I could do it from the command line. I used the definition from J0EK3R of the <a href="https://github.com/J0EK3R/ebusd-configuration-weishaupt/blob/master/weishaupt/Documentation/f6.md">f6 address</a> which is the boiler controller, and I tried to guess the hex code, but I only got errors. When there were no errors the boiler still did nothing. At this point, I didn't know whether the J0EK3R configuration was wrong or whether the hex I had determined was incorrect. I reached a point where I was ready to give up. After all, I never thought I would go so low-level and write bytes directly into a bus. I thought that with the ebusd adapter, everything would work straight away and I would be able to control the heating with Home Assistant. Instead, it seemed I had to control everything myself, but I did not know why. I didn't know the correct syntax for the command.</p>
 <p>But how could I learn it? From whom or what? The answer was my old thermostat.</p>
 <p>Ultimately, Ebus is a bus to which multiple devices can be connected, including masters and slaves. I thought I could connect everything together — the boiler, the old thermostat and the Ebus adapter — and use the adapter to listen to the communication between the thermostat and the boiler, and learn from it.</p>
-<p><img src="https://federicoB.github.io/posts/20251115-heating-automation/" alt="My reverse engineering setup" /></p>
+<img src="reverse_edited.jpg" alt="My reverse engineering setup" width="800">
+<p>Here’s a zoomed-out picture showing how professionally I was working:
+<img src="pile.jpg" alt="My reverse engineering setup" width="300"></p>
 <p>I had never connected cables in that way before and I had no idea if it would work, but it did! I could read the traffic on the bus and see the hex. Then, by adjusting the controls on the old thermostat, I could see how the desired temperatures were encoded and determine the endianness. I used ChatGPT to decode the hex values, giving it the hex message and the assumed structure from J0EK3R as input.</p>
 <p>I'll give you an example of how deep I had to go to decode it. For example, I could see my thermostat was transmitting the message <code>30f1050709aa032d020080ffffff</code> and this is how I decode it:</p>
-<p><img src="/202511_heating_automation/img/decoding.jpg" alt="Decoding of ebus message" title="Decoding of ebus message" /></p>
+<img src="decoding.jpg" alt="Decoding of ebus message" width="800">
 <p>But I also saw that the boiler would not stop when it reached the desired temperature. However, it was also transmitting the boiler temperature, and the thermostat would send a "turn off" message when reached. My code would have to do the same.</p>
 <p>I also noticed that I need to continuously instruct the boiler to stay off; otherwise, it turns on by itself when it detects that it is cold outside.</p>
 <p>By mimicking the same messages that the Weishaupt thermostat was sending, at least I didn’t have to worry anymore about breaking the heating, as I was sending manufacturer-approved commands!</p>
@@ -199,7 +201,7 @@ This confused me because I only had one device, my boiler, but instead I was get
 <p><strong>Building My Own Python Bridge</strong></p>
 <p>I attempted to modify the ebusd code for a while, but it was far too complicated. Ultimately, I decided that the MQTT integration was not sufficient for my needs, and I could instead write my own solution. My plan was to create a service, written in Python, that would bridge ebusd and MQTT. This service would interact with ebusd using <code>ebusctl</code> and utilize the <a href="https://pypi.org/project/paho-mqtt/">paho-mqtt</a> library to read and write messages to the broker.</p>
 <p>This is the architecture scheme that shows the setup i was aiming for:</p>
-<p><img src="/202511_heating_automation/img/architecture.jpg" alt="Architecture drawing showing ebusd-ebusmq-mosquitto together" title="Architecture drawing showing ebusd-ebusmq-mosquitto together" /></p>
+<img src="architecture.jpg" alt="Architecture drawing showing ebusd-ebusmq-mosquitto together" width="800">
 <p>I began by crafting the discovery payload I had been aiming for in MQTT, which immediately resulted in writable entities in Home Assistant. Next, I implemented functionality to listen for command messages from Home Assistant and trigger the corresponding commands on the boiler. Following that, I developed a loop to continuously send the desired status, ensuring the boiler remained on or off as intended.</p>
 <p>Afterward, I focused on reading values from <code>ebusctl</code> to monitor the actual boiler temperature and the outside temperature. These values were first read into <code>ebusmq</code> and then sent to Home Assistant via MQTT. Finally, I packaged everything into a clean container and set up a GitLab CI/CD pipeline for deployment on my home server.</p>
 <p>This process took me slightly less than three days and brought me immense satisfaction, as I was no longer stuck debugging and could instead create my solution.</p>
@@ -215,10 +217,10 @@ This confused me because I only had one device, my boiler, but instead I was get
 </ul>
 <p><strong>Potential Next Steps</strong></p>
 <ul>
-<li>Connect to weather forecasts: Avoid warming the flat excessively when a sunny day is expected or start heating at night if very cold mornings are predicted.</li>
-<li>Build nice dashboards in Home Assistant: For example, show flow temperature, return temperature, on/off status, history graphs, and efficiency metrics.</li>
-<li>Generate alerts: For example, alert when the pump hasn’t been running for X minutes or when an error code is detected in the heating system.</li>
-<li>Reinforcement learning: Enable the system to learn from temperature patterns, occupancy, and energy usage to optimize heating schedules automatically.</li>
+<li><strong>Connect to weather forecasts</strong>: Avoid warming the flat excessively when a sunny day is expected or start heating at night if very cold mornings are predicted.</li>
+<li><strong>Build nice dashboards in Home Assistant</strong>: For example, show flow temperature, return temperature, on/off status, history graphs, and efficiency metrics.</li>
+<li><strong>Generate alerts</strong>: For example, alert when the pump hasn’t been running for X minutes or when an error code is detected in the heating system.</li>
+<li><strong>Reinforcement learning</strong>: Enable the system to learn from temperature patterns, occupancy, and energy usage to optimize heating schedules automatically.</li>
 </ul>
 
         </section>
@@ -229,6 +231,8 @@ This confused me because I only had one device, my boiler, but instead I was get
                     <ul class="tags">
                         
                             <li><a href=https://federicoB.github.io/tags/home-automation/>home-automation</a></li>
+                        
+                            <li><a href=https://federicoB.github.io/tags/python/>python</a></li>
                         
                     </ul>
                 </nav>

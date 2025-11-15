@@ -5,7 +5,7 @@ description = "A deep dive into reverse engineering my Weishaupt WTC-15A heating
 
 
 [taxonomies]
-tags = ["home-automation"]
+tags = ["home-automation","python"]
 +++
 
 
@@ -36,11 +36,11 @@ First, I had to determine the type of machine I was dealing with. That was simpl
 
 I am in possession of a Weishaupt WTC-15A. It is a wall-hung gas condensing boiler from 2014, good, solid German quality, it can last for more than 20 years. But it came from a time of not so much interconnectivity, and it was now my duty to connect it to the world of home automation.
 
-![My Weishaupt WTC-15A gas condensing boiler](heater.jpg "My Weishaupt WTC-15A gas condensing boiler")
+<img src="heater.jpg" alt="My Weishaupt WTC-15A gas condensing boiler" width="200">
 
 Next, I identified the current thermostat. After removing it from the wall, I read "WCM-FB," which stands for "Weishaupt Condens Manager Fernbedienung" (Remote Control). Pictures on the internet confirmed this.
 
-![My old thermostat a WCM-FB](/202511_heating_automation/img/thermostat.jpg "WCM-FB Thermostat")
+<img src="thermostat.jpg" alt="WCM-FB Thermostat" width="200">
 
 At first, I was confused by the wiring. The thermostat was connected to the boiler with a blue and a brown cable, and when checking the boiler’s electrical diagram, I assumed the brown wire was a simple relay or M-Bus/Modbus line — basically, a signal cable that just turns the heating on or off. That turned out to be wrong. After researching the blue wire more carefully, I discovered that the two wires together actually form an **eBus** connection: a communication protocol commonly used by German heating system manufacturers. Unlike a basic relay that only sends on/off signals, eBus allows devices to exchange much richer data, such as temperatures, burner status, error codes, and configuration settings. In other words, it’s a small digital network that lets thermostats, controllers, and boilers “talk” intelligently over just a single **pair** of wires.
 
@@ -90,13 +90,16 @@ But how could I learn it? From whom or what? The answer was my old thermostat.
 
 Ultimately, Ebus is a bus to which multiple devices can be connected, including masters and slaves. I thought I could connect everything together — the boiler, the old thermostat and the Ebus adapter — and use the adapter to listen to the communication between the thermostat and the boiler, and learn from it. 
 
-![My reverse engineering setup]()
+<img src="reverse_edited.jpg" alt="My reverse engineering setup" width="800">
+
+Here’s a zoomed-out picture showing how professionally I was working:
+<img src="pile.jpg" alt="My reverse engineering setup" width="300">
 
 I had never connected cables in that way before and I had no idea if it would work, but it did! I could read the traffic on the bus and see the hex. Then, by adjusting the controls on the old thermostat, I could see how the desired temperatures were encoded and determine the endianness. I used ChatGPT to decode the hex values, giving it the hex message and the assumed structure from J0EK3R as input.
 
 I'll give you an example of how deep I had to go to decode it. For example, I could see my thermostat was transmitting the message `30f1050709aa032d020080ffffff` and this is how I decode it:
 
-![Decoding of ebus message](/202511_heating_automation/img/decoding.jpg "Decoding of ebus message") 
+<img src="decoding.jpg" alt="Decoding of ebus message" width="800">
 
 But I also saw that the boiler would not stop when it reached the desired temperature. However, it was also transmitting the boiler temperature, and the thermostat would send a "turn off" message when reached. My code would have to do the same.
 
@@ -153,7 +156,7 @@ I attempted to modify the ebusd code for a while, but it was far too complicated
 
 This is the architecture scheme that shows the setup i was aiming for:
 
-![Architecture drawing showing ebusd-ebusmq-mosquitto together](/202511_heating_automation/img/architecture.jpg "Architecture drawing showing ebusd-ebusmq-mosquitto together")
+<img src="architecture.jpg" alt="Architecture drawing showing ebusd-ebusmq-mosquitto together" width="800">
 
 I began by crafting the discovery payload I had been aiming for in MQTT, which immediately resulted in writable entities in Home Assistant. Next, I implemented functionality to listen for command messages from Home Assistant and trigger the corresponding commands on the boiler. Following that, I developed a loop to continuously send the desired status, ensuring the boiler remained on or off as intended.
 
@@ -177,8 +180,8 @@ My basic but very effective automation heats the boiler to 50 degrees and then s
 
 **Potential Next Steps**
 
-* Connect to weather forecasts: Avoid warming the flat excessively when a sunny day is expected or start heating at night if very cold mornings are predicted.
-* Build nice dashboards in Home Assistant: For example, show flow temperature, return temperature, on/off status, history graphs, and efficiency metrics.
-* Generate alerts: For example, alert when the pump hasn’t been running for X minutes or when an error code is detected in the heating system.
-* Reinforcement learning: Enable the system to learn from temperature patterns, occupancy, and energy usage to optimize heating schedules automatically.
+* **Connect to weather forecasts**: Avoid warming the flat excessively when a sunny day is expected or start heating at night if very cold mornings are predicted.
+* **Build nice dashboards in Home Assistant**: For example, show flow temperature, return temperature, on/off status, history graphs, and efficiency metrics.
+* **Generate alerts**: For example, alert when the pump hasn’t been running for X minutes or when an error code is detected in the heating system.
+* **Reinforcement learning**: Enable the system to learn from temperature patterns, occupancy, and energy usage to optimize heating schedules automatically.
 
