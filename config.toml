@@ -5,6 +5,8 @@ base_url = "https://federicoB.github.io/"
 title = "federicoB"
 description = "Federico Bertani blog"
 
+output_dir = "docs"
+
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
 

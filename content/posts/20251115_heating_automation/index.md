@@ -170,7 +170,15 @@ I haven’t released `ebusmq` on GitHub yet because, so far, it’s very tightly
 
 To monitor the temperature in each room of the flat, I purchased three SONOFF SNZB-02D Zigbee Temperature and Humidity Sensors. They are all connected to a Zigbee USB dongle installed on the server, and their data is stored in Home Assistant. I calculate the average flat temperature, and the triggering of the heating system is based on that.
 
-My basic but very effective automation heats the boiler to 50 degrees and then stops. It does not warm up again for another hour. At night, the heating system stays off. All these parameters are adjustable via Home Assistant. I recently experienced the convenience of a warm house after returning from my trip to Hamburg. While on the train, I was able to trigger the heating system remotely!
+My basic but very effective automation heats the boiler to 50 degrees and then stops. It does not warm up again for another hour. At night, the heating system stays off. All these parameters are adjustable via Home Assistant. 
+I'm far from getting one of those nice-looking dashboards you see on [r/homeassistant](https://www.reddit.com/r/homeassistant/), but this is how mine looks right now:
+
+<img src="home_assitant.png" alt="My heating home assitant dashboard" width="800">
+
+You can notice that at night the temperature goes down exactly as we want, and then rises again in the morning. It doesn’t reach exactly 21 °C, but that’s perfectly fine. Anything between 20 °C and 21 °C feels comfortable. I can still improve the temperature stability in the future.
+
+
+I recently experienced the convenience of a warm house after returning from my trip to Hamburg. While on the train, I was able to trigger the heating system remotely!
 
 **Key Takeaways:**
 
