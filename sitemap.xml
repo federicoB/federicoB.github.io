@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="https://federicoB.github.io/sitemap_style.xsl" type="text/xsl"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://federicoB.github.io/</loc>
+    </url>
+    <url>
+        <loc>https://federicoB.github.io/posts/</loc>
+    </url>
+    <url>
+        <loc>https://federicoB.github.io/posts/20251115-heating-automation/</loc>
+        <lastmod>2022-11-15</lastmod>
+    </url>
+    <url>
+        <loc>https://federicoB.github.io/tags/</loc>
+    </url>
+    <url>
+        <loc>https://federicoB.github.io/tags/home-automation/</loc>
+    </url>
+    <url>
+        <loc>https://federicoB.github.io/tags/python/</loc>
+    </url>
+</urlset>
