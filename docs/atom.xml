@@ -17,16 +17,7 @@
         <subtitle>Federico Bertani blog</subtitle>
     <link href="https://federicoB.github.io/atom.xml" rel="self" type="application/atom+xml"/>
     <link href="https://federicoB.github.io" rel="alternate" type="text/html"/>
-    <generator uri="https://www.getzola.org/">Zola</generator><updated>2025-11-15T00:00:00+00:00</updated><id>https://federicoB.github.io/atom.xml</id><entry xml:lang="en">
-        <title>About</title>
-        <published>2025-11-15T00:00:00+00:00</published>
-        <updated>2025-11-15T00:00:00+00:00</updated>
-        <author>
-            <name>Unknown</name>
-        </author>
-        <link rel="alternate" href="https://federicoB.github.io/about/" type="text/html"/>
-        <id>https://federicoB.github.io/about/</id>
-        </entry><entry xml:lang="en">
+    <generator uri="https://www.getzola.org/">Zola</generator><updated>2022-11-15T00:00:00+00:00</updated><id>https://federicoB.github.io/atom.xml</id><entry xml:lang="en">
         <title>Reverse Engineering My Heating System: Weishaupt WTC-15A Meets Home Automation </title>
         <published>2022-11-15T00:00:00+00:00</published>
         <updated>2022-11-15T00:00:00+00:00</updated>

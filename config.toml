@@ -52,17 +52,17 @@ external_links_class = "external"
 
 
 [extra]
-section_path = "posts/_index.md"  # Where to find your posts.
-max_posts = 5  # Show 5 posts on the home page.
 enable_csp = "false"
 
+menu = [
+    { name = "blog", url = "blog", trailing_slash = true },
+    { name = "tags", url = "tags", trailing_slash = true },
+] #TODO add an about page?
 
 copyright = "Federico Bertani"
 
-# config social icon info in the footer
-[[extra.social]]
-icon = "github"
-name = "GitHub"
-url = "https://github.com/federicoB"
 
-
+socials = [
+    { name = "github", url = "https://github.com/federicoB", icon = "github" },
+    { name = "linkedin", url = "https://www.linkedin.com/in/federicobertani/", icon = "linkedin" },
+]
